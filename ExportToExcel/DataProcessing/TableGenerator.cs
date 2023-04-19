@@ -1,91 +1,125 @@
 ﻿namespace ExportToExcel.DataProcessing
 {
-	using DocumentFormat.OpenXml;
-	using DocumentFormat.OpenXml.Packaging;
-	using DocumentFormat.OpenXml.Spreadsheet;
+    using System.Collections.Generic;
+    using DocumentFormat.OpenXml;
+    using DocumentFormat.OpenXml.Packaging;
+    using DocumentFormat.OpenXml.Spreadsheet;
+    using ExportToExcel.Helpers;
+    using ExportToExcel.Models;
 
-	using ExportToExcel.Models;
+    /// <summary>
+    /// Класс, осуществляющий генерацию таблицы.
+    /// </summary>
+    public class TableGenerator<T>
+    {
+        /// <summary>
+        /// Таблица.
+        /// </summary>
+        private readonly Table<T> _table;
 
-	using System.Collections.Generic;
-	using System.IO;
-	using System.Linq;
+        private uint _rowIndex;
 
-	/// <summary>
-	/// Класс, осуществляющий генерацию таблицы.
-	/// </summary>
-	public class TableGenerator<T>
-	{
-		/// <summary>
-		/// Таблица.
-		/// </summary>
-		private readonly Table<T> _table;
+        /// <summary>
+        /// Словарь стилей.
+        /// </summary>
+        private readonly Dictionary<Column<T>, uint> _styleIndex;
 
-		/// <summary>
-		/// Словарь стилей.
-		/// </summary>
-		private readonly Dictionary<Column<T>, uint> _styleIndex;
+        /// <summary>
+        /// Конструктор класса <see cref="SpreadsheetGenerator{T}"/>
+        /// </summary>
+        /// <param name="table">Таблица.</param>
+        public TableGenerator(Table<T> table)
+        {
+            _table = table;
+            _styleIndex = new Dictionary<Column<T>, uint>();
+        }
 
-		/// <summary>
-		/// Конструктор класса <see cref="SpreadsheetGenerator{T}"/>
-		/// </summary>
-		/// <param name="table">Таблица.</param>
-		public TableGenerator(Table<T> table)
-		{
-			_table = table;
-			_styleIndex = new Dictionary<Column<T>, uint>();
-		}
+        /// <summary>
+        /// Генерирует таблицу по документу из заданного пути.
+        /// </summary>
+        /// <param name="path">Путь.</param>
+        public void Generate(string path)
+        {
+            using (var document = SpreadsheetDocument.Create(path, SpreadsheetDocumentType.Workbook))
+                Generate(document);
+        }
 
-		/// <summary>
-		/// Генерирует таблицу по документу из заданного пути.
-		/// </summary>
-		/// <param name="path">Путь.</param>
-		/// <param name="name">Название таблицы.</param>
-		public void Generate(string path, string name)
-		{
-			if (!Directory.Exists(path)) Directory.CreateDirectory(path);
+        /// <summary>
+        /// Генерирует таблицу из заданного документа.
+        /// </summary>
+        /// <param name="document">Документ хранящий таблицу.</param>
+        private void Generate(SpreadsheetDocument document)
+        {
+            if (_table.Columns.Count == 0)
+                return;
 
-			using var document = SpreadsheetDocument.Create($"{path}\\{name}", SpreadsheetDocumentType.Workbook);
-			Generate(document);
-		}
+            _rowIndex = 0;
+            var part = document.AddWorkbookPart();
+            part.Workbook = new Workbook();
 
-		/// <summary>
-		/// Генерирует таблицу из заданного документа.
-		/// </summary>
-		/// <param name="document">Документ хранящий таблицу.</param>
-		private void Generate(SpreadsheetDocument document)
-		{
-			if (_table.Columns.Count == 0) return;
+            CreateStyles(part, _table);
 
-			var part = document.AddWorkbookPart();
-			part.Workbook = new Workbook();
+            var worksheetPart = part.AddNewPart<WorksheetPart>();
+            worksheetPart.Worksheet = new Worksheet();
 
-			var stylesCreator = new StylesCreator<T>(_table, _styleIndex);
-			var stylePart = part.AddNewPart<WorkbookStylesPart>();
-			stylePart.Stylesheet = stylesCreator.CreateStylesheet();
+            CreateSheets(document, worksheetPart, _table);
 
-			var worksheetPart = part.AddNewPart<WorksheetPart>();
-			worksheetPart.Worksheet = new Worksheet();
+            var columns = CreateColumns(_table);
+            worksheetPart.Worksheet.Append(columns);
 
-			var sheets = document.WorkbookPart.Workbook.AppendChild(new Sheets());
-			var id = document.WorkbookPart.GetIdOfPart(worksheetPart);
-			var sheet = new Sheet { Id = id, SheetId = 1, Name = _table.Title };
-			sheets.Append(sheet);
+            var sheetData = new SheetData();
 
-			var sheetData = new SheetData();
-			var appender = new DataAppender<T>(_table, _styleIndex);
+            sheetData = CreateSheetData(sheetData, _table);
 
-			uint rowIndex = 0;
-			if (_table.ShowHeader) appender.AppendHeaders(sheetData, rowIndex++);
+            if (_table.AdditionalTables != null)
+                _table.AdditionalTables.ForEach(t => CreateSheetData(sheetData, t));
 
-			if (_table.DataSource != null)
-				_table.DataSource.ToList().ForEach(item => appender.AppendRow(sheetData, rowIndex++, item));
+            worksheetPart.Worksheet.AppendChild(sheetData);
+            part.Workbook.Save();
+        }
 
-			var columns = new Columns();
-			columns.Append(new Column() { Min = 1, Max = UInt32Value.FromUInt32((uint)_table.Columns.Count), Width = 20, CustomWidth = true });
-			worksheetPart.Worksheet.Append(columns);
-			worksheetPart.Worksheet.AppendChild(sheetData);
+        private void CreateStyles(WorkbookPart part, Table<T> table)
+        {
+            var stylesCreator = new StylesCreator<T>(table, _styleIndex);
+            var stylePart = part.AddNewPart<WorkbookStylesPart>();
+            stylePart.Stylesheet = stylesCreator.CreateStylesheet();
+        }
 
-			part.Workbook.Save();
-		}
-	}
+        private void CreateSheets(SpreadsheetDocument document, WorksheetPart part, Table<T> table)
+        {
+            var sheets = document.WorkbookPart.Workbook.AppendChild(new Sheets());
+
+            var sheet = new Sheet
+            {
+                Id = document.WorkbookPart.GetIdOfPart(part),
+                SheetId = 1,
+                Name = table.Title
+            };
+
+            sheets.Append(sheet);
+        }
+
+        private SheetData CreateSheetData(SheetData sheetData, Table<T> table)
+        {
+            var appender = new DataAppender<T>(table, _styleIndex);
+
+            if (table.ShowHeader)
+                appender.AppendHeaders(sheetData, _rowIndex++);
+
+            if (table.DataSource != null)
+                table.DataSource.ForEach(item => appender.AppendRow(sheetData, _rowIndex++, item));
+
+            return sheetData;
+        }
+
+        private Columns CreateColumns(Table<T> table) => new Columns(CreateColumn(table));
+
+        private Column CreateColumn(Table<T> table) => new Column
+        {
+            Min = 1,
+            Max = UInt32Value.FromUInt32((uint)table.Columns.Count),
+            Width = 20,
+            CustomWidth = true
+        };
+    }
 }
