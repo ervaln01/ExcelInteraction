@@ -1,2 +1,2 @@
 # ExportToExcel
-Library for creating .xlsx documents from IEnumerable<T> collections.
+Library for writing and reading .xlsx documents similar to IEnumerable<T> collections.
