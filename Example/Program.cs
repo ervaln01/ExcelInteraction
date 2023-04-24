@@ -51,7 +51,7 @@ namespace Example
 
         private static ITableImporter GetTableImporter(string fileName)
         {
-            var ext = Path.GetFileNameWithoutExtension(fileName);
+            var ext = Path.GetExtension(fileName);
 
             return ext switch
             {

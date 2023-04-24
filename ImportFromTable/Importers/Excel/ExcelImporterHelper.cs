@@ -34,7 +34,7 @@ namespace ImportFromTable.Importers.Excel
             if (!int.TryParse(cell.InnerText, out var result))
                 return string.Empty;
 
-            return sharedStringTable.ElementAt(result).InnerText;
+            return sharedStringTable?.ElementAt(result).InnerText;
         }
     }
 }

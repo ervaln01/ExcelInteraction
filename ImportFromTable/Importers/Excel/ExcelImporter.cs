@@ -15,7 +15,7 @@ namespace ImportFromTable.Importers.Excel
             using (var document = SpreadsheetDocument.Open(path, false))
             {
                 var workbook = document.WorkbookPart;
-                var sharedStringTable = workbook.SharedStringTablePart.SharedStringTable;
+                var sharedStringTable = workbook?.SharedStringTablePart?.SharedStringTable;
 
                 if (workbook.WorksheetParts.Count() != 1)
                     throw new InvalidOperationException("Невозможно получить единственную таблицу из книги!");
