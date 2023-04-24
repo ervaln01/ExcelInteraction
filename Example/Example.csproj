@@ -11,7 +11,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\ExportToExcel\ExportToExcel.csproj" />
-    <ProjectReference Include="..\ImportFromExcel\ImportFromExcel.csproj" />
+    <ProjectReference Include="..\ImportFromTable\ImportFromTable.csproj" />
   </ItemGroup>
 
 </Project>

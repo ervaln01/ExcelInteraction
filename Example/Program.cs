@@ -2,12 +2,15 @@
 using ExportToExcel.Models;
 using ImportFromExcel;
 using ImportFromExcel.Data;
+using ImportFromExcel.Importers.Csv;
+using ImportFromExcel.Importers.Excel;
+using ImportFromExcel.Importers;
 using ImportFromExcel.Parsers;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-
+using System.IO;
 
 /// <summary>
 /// Для работы библиотеки необходимо установить Nuget DocumentFormat.OpenXML
@@ -23,7 +26,7 @@ namespace Example
 	{
 		static void Main(string[] args)
 		{
-			var tableName = "Example table.xlsx";
+			var fileName = "Example table.xlsx";
 
             var now = DateTime.Now;
 			var exampleList = new List<ExampleClass>()
@@ -37,16 +40,36 @@ namespace Example
 				.AddColumn(x => x.Name, new ColumnFormat().SetTitle("Human name"))
 				.AddColumn(x => x.Count)
 				.AddColumn(x => x.Date, new ColumnFormat().SetTitle("Date").SetDataType(typeof(string)).SetFormat("dd.MM.yyyy"))
-				.GenerateTable(tableName);
+				.GenerateTable(fileName);
 
-			var exampleData = TableDisassembler.Import(new SimpleParser(), new ExampleClass(), tableName, hasHeaders: true);
+			var importer = GetTableImporter(fileName);
+
+            var exampleData = importer.Import(new SimpleParser(), new ExampleClass(), fileName, hasHeaders: true);
 			exampleData.Data.ForEach(d => Console.WriteLine(d.Show()));
 
 			Console.ReadLine();
 		}
-	}
 
-	public class ExampleClass : IExcelData
+        private static ITableImporter GetTableImporter(string fileName)
+        {
+			var ext = Path.GetFileNameWithoutExtension(fileName);
+
+            switch (ext)
+            {
+                case ".xlsx":
+                    return new ExcelImporter();
+
+                case ".csv":
+                case ".txt":
+                    return new CsvImporter();
+
+                default:
+                    throw new InvalidOperationException($"Extension ({ext}) not supported");
+            }
+        }
+    }
+
+	public class ExampleClass : ITableData
 	{
         private const int PARSED_CELLS_COUNT = 3;
 

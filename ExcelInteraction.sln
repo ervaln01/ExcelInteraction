@@ -7,7 +7,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Example", "Example\Example.
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ExportToExcel", "ExportToExcel\ExportToExcel.csproj", "{5BB84721-146D-4445-BD9B-B77017BF64A8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ImportFromExcel", "ImportFromExcel\ImportFromExcel.csproj", "{E60EC5D7-6BD1-4FB5-9C96-D0C108433A9B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ImportFromTable", "ImportFromTable\ImportFromTable.csproj", "{E60EC5D7-6BD1-4FB5-9C96-D0C108433A9B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

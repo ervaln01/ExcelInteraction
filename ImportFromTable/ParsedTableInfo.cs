@@ -3,7 +3,7 @@ using ImportFromExcel.Data;
 
 namespace ImportFromExcel
 {
-    public class TableData<T> where T : IExcelData
+    public class ParsedTableInfo<T> where T : ITableData
     {
         public List<T> Data { get; private set; }
 
@@ -13,7 +13,7 @@ namespace ImportFromExcel
 
         public T this[int index] => Data[index];
 
-        public TableData(List<T> data, int parsedCount)
+        public ParsedTableInfo(List<T> data, int parsedCount)
         {
             Data = data;
             ParsedCount = parsedCount;
