@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace ImportFromExcel.Data
+namespace ImportFromTable.Data
 {
     public interface ITableData : ICloneable
     {

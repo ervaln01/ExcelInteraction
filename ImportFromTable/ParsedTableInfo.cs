@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
-using ImportFromExcel.Data;
+using ImportFromTable.Data;
 
-namespace ImportFromExcel
+namespace ImportFromTable
 {
     public class ParsedTableInfo<T> where T : ITableData
     {

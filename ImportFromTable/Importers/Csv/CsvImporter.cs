@@ -1,10 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using ImportFromExcel.Data;
-using ImportFromExcel.Parsers;
+using ImportFromTable.Data;
+using ImportFromTable.Parsers;
 
-namespace ImportFromExcel.Importers.Csv
+namespace ImportFromTable.Importers.Csv
 {
     public class CsvImporter : ITableImporter
     {

@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
-using ImportFromExcel.Data;
+using ImportFromTable.Data;
 
-namespace ImportFromExcel.Parsers
+namespace ImportFromTable.Parsers
 {
     public class SimpleParser : ITableParser
     {

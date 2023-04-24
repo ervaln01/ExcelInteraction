@@ -1,7 +1,7 @@
-﻿using ImportFromExcel.Data;
-using ImportFromExcel.Parsers;
+﻿using ImportFromTable.Data;
+using ImportFromTable.Parsers;
 
-namespace ImportFromExcel.Importers
+namespace ImportFromTable.Importers
 {
     public interface ITableImporter
     {

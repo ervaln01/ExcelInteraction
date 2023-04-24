@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using ImportFromExcel.Data;
+using ImportFromTable.Data;
 
-namespace ImportFromExcel.Importers.Csv
+namespace ImportFromTable.Importers.Csv
 {
     public static class CsvImporterHelper
     {

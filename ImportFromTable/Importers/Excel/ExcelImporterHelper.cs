@@ -1,10 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using DocumentFormat.OpenXml.Spreadsheet;
-using ImportFromExcel.Data;
-using ImportFromExcel.Parsers;
+using ImportFromTable.Data;
+using ImportFromTable.Parsers;
 
-namespace ImportFromExcel.Importers.Excel
+namespace ImportFromTable.Importers.Excel
 {
     public static class ExcelImporterHelper
     {
